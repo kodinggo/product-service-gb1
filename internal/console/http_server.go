@@ -2,6 +2,9 @@ package console
 
 import (
 	"github.com/kodinggo/product-service-gb1/db"
+	"github.com/kodinggo/product-service-gb1/internal/delivery/http"
+	"github.com/kodinggo/product-service-gb1/internal/repository"
+	"github.com/kodinggo/product-service-gb1/internal/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,10 +30,13 @@ func httpServer(cmd *cobra.Command, args []string) {
 
 	e := echo.New()
 
-	v1 := e.Group("/api/v1")
-	v1.GET("/ping", func(c echo.Context) error {
-		return c.String(200, "pong")
-	})
+	categoryRepo := repository.NewCategoryRepository(mysql)
+	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
+
+	handler := http.NewHTTPHandler()
+	handler.RegisterCategoryUsecase(categoryUsecase)
+
+	handler.Routes(e)
 
 	err = e.Start(":3232")
 	continueOrFatal(err)
