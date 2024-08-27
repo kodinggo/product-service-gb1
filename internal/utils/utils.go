@@ -3,8 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 func Dump(v interface{}) string {
@@ -16,17 +14,21 @@ func Dump(v interface{}) string {
 	return string(json)
 }
 
-func BuildSortQuery(db *gorm.DB, sort string) {
+func BuildSortQuery(sort string) string {
 	if sort == "" {
-		return
+		return ""
 	}
 
 	splitted := strings.Split(sort, ",")
+	sortQueries := []string{}
+
 	for _, s := range splitted {
 		if strings.HasPrefix(s, "-") {
-			db.Order(strings.TrimLeft(s, "-") + " DESC")
+			sortQueries = append(sortQueries, strings.TrimLeft(s, "-")+" DESC")
 		} else {
-			db.Order(s)
+			sortQueries = append(sortQueries, s+" ASC")
 		}
 	}
+
+	return strings.Join(sortQueries, ", ")
 }

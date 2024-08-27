@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kodinggo/product-service-gb1/internal/model"
 	"github.com/kodinggo/product-service-gb1/internal/utils"
@@ -29,23 +30,25 @@ func (cr *categoryRepository) FindAll(ctx context.Context, query model.CategoryQ
 	qb := cr.db.WithContext(ctx)
 
 	if query.Name != "" {
-		qb.Where("name LIKE ?", "%"+query.Name+"%")
+		fmt.Println("query.Name", query.Name)
+		qb = qb.Where("name LIKE ?", "%"+query.Name+"%")
 	}
 
 	if query.Sort != "" {
-		utils.BuildSortQuery(qb, query.Sort)
+		sortQuery := utils.BuildSortQuery(query.Sort)
+		qb = qb.Order(sortQuery)
 	}
 
 	if query.Size != 0 {
-		qb.Limit(query.Size)
+		qb = qb.Limit(query.Size)
 	}
 
 	if query.Page != 0 {
 		offset := (query.Page - 1) * query.Size
-		qb.Offset(offset)
+		qb = qb.Offset(offset)
 	}
 
-	if err := cr.db.Find(&categories).Error; err != nil {
+	if err := qb.Find(&categories).Error; err != nil {
 		logger.Error(err)
 		return nil, err
 	}

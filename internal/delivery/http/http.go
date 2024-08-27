@@ -2,10 +2,7 @@ package http
 
 import (
 	"github.com/kodinggo/product-service-gb1/internal/model"
-	"github.com/kodinggo/product-service-gb1/internal/utils"
-	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 type response struct {
@@ -34,9 +31,9 @@ func (h *httpHandler) Routes(route *echo.Echo) {
 
 	// private routes goes here
 	routes := v1.Group("")
-	routes.Use(middleware.Logger())
-	routes.Use(middleware.CORS())
-	routes.Use(echojwt.WithConfig(utils.JWtConfig()))
+	// routes.Use(middleware.Logger())
+	// routes.Use(middleware.CORS())
+	// routes.Use(echojwt.WithConfig(utils.JWtConfig()))
 
 	routes.POST("/categories", h.createCategory)
 	routes.PUT("/categories/:id", h.updateCategory)

@@ -1,10 +1,12 @@
 package console
 
 import (
+	"github.com/go-playground/validator"
 	"github.com/kodinggo/product-service-gb1/db"
 	"github.com/kodinggo/product-service-gb1/internal/delivery/http"
 	"github.com/kodinggo/product-service-gb1/internal/repository"
 	"github.com/kodinggo/product-service-gb1/internal/usecase"
+	"github.com/kodinggo/product-service-gb1/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -29,6 +31,9 @@ func httpServer(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	e := echo.New()
+	e.Validator = &utils.CustomValidator{
+		Validator: validator.New(),
+	}
 
 	categoryRepo := repository.NewCategoryRepository(mysql)
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)

@@ -85,6 +85,14 @@ func (h *httpHandler) createCategory(c echo.Context) error {
 		})
 	}
 
+	err := c.Validate(&category)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
 	if err := category.Validate(); err != nil {
 		return c.JSON(http.StatusBadRequest, response{
 			Status:  http.StatusBadRequest,
@@ -92,20 +100,20 @@ func (h *httpHandler) createCategory(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.UserClaims(c)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, response{
-			Status:  http.StatusUnauthorized,
-			Message: err.Error(),
-		})
-	}
+	// user, err := utils.UserClaims(c)
+	// if err != nil {
+	// 	return c.JSON(http.StatusUnauthorized, response{
+	// 		Status:  http.StatusUnauthorized,
+	// 		Message: err.Error(),
+	// 	})
+	// }
 
-	if user.Role != "admin" {
-		return c.JSON(http.StatusForbidden, response{
-			Status:  http.StatusForbidden,
-			Message: "only admin can create a category",
-		})
-	}
+	// if user.Role != "admin" {
+	// 	return c.JSON(http.StatusForbidden, response{
+	// 		Status:  http.StatusForbidden,
+	// 		Message: "only admin can create a category",
+	// 	})
+	// }
 
 	newCategory, err := h.categoryUsecase.Create(c.Request().Context(), category)
 	if err != nil {
