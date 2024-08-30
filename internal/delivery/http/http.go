@@ -13,6 +13,7 @@ type response struct {
 
 type httpHandler struct {
 	categoryUsecase model.CategoryUsecase
+	productUsecase  model.ProductUsecase
 }
 
 func NewHTTPHandler() *httpHandler {
@@ -23,11 +24,18 @@ func (h *httpHandler) RegisterCategoryUsecase(cu model.CategoryUsecase) {
 	h.categoryUsecase = cu
 }
 
+func (h *httpHandler) RegisterProductUsecase(pu model.ProductUsecase) {
+	h.productUsecase = pu
+}
+
 func (h *httpHandler) Routes(route *echo.Echo) {
 	v1 := route.Group("/api/v1")
 
 	v1.GET("/categories", h.findCategories)
 	v1.GET("/categories/:id", h.findCategoryByID)
+
+	v1.GET("/products", h.findAllProducts)
+	v1.GET("/products/:id", h.findProductByID)
 
 	// private routes goes here
 	routes := v1.Group("")
@@ -38,4 +46,8 @@ func (h *httpHandler) Routes(route *echo.Echo) {
 	routes.POST("/categories", h.createCategory)
 	routes.PUT("/categories/:id", h.updateCategory)
 	routes.DELETE("/categories/:id", h.deleteCategory)
+
+	routes.POST("/products", h.createProduct)
+	routes.PUT("/products/:id", h.updateProduct)
+	routes.DELETE("/products/:id", h.deleteProduct)
 }
