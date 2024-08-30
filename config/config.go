@@ -17,3 +17,7 @@ func MysqlPass() string {
 func MysqlDB() string {
 	return os.Getenv("MYSQL_DB")
 }
+
+func JwtSecret() string {
+	return os.Getenv("JWT_SECRET")
+}
