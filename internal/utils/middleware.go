@@ -1,45 +1,67 @@
 package utils
 
 import (
+	"context"
 	"errors"
+	"net/http"
+	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/kodinggo/product-service-gb1/config"
-	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+
+	authPb "github.com/kodinggo/user-service-gb1/pb/auth"
 )
 
 var (
 	errUnauthorized = errors.New("unauthorized")
 )
 
-// JWTClaims :nodoc:
-type JWTClaims struct {
-	jwt.RegisteredClaims
-	ID   string
-	Role string
+type JWTMiddleware struct {
+	authClient authPb.JWTValidatorClient
 }
 
-func JWtConfig() echojwt.Config {
-	c := echojwt.Config{
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(JWTClaims)
-		},
-		SigningKey: []byte(config.JwtSecret()),
+func NewJWTMiddleware(authClient authPb.JWTValidatorClient) *JWTMiddleware {
+	return &JWTMiddleware{
+		authClient: authClient,
 	}
-
-	return c
 }
 
-func UserClaims(c echo.Context) (*JWTClaims, error) {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*JWTClaims)
+// ValidateJWT is a middleware function that validates JWT tokens using a gRPC call.
+func (m *JWTMiddleware) ValidateJWT(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		authHeader := c.Request().Header.Get("Authorization")
+		if authHeader == "" {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "missing token"})
+		}
 
-	if claims == nil {
-		logrus.WithField("ctx", Dump(c)).Error(errUnauthorized)
-		return nil, errUnauthorized
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		if token == authHeader {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid token format"})
+		}
+
+		// Create a context for the gRPC call
+		ctx := context.Background()
+
+		// Call gRPC to validate the token
+		req := &authPb.ValidateTokenRequest{Token: token}
+		res, err := m.authClient.ValidateToken(ctx, req)
+		if err != nil || res == nil || !res.Valid {
+			logrus.Error(err)
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid or expired token"})
+		}
+
+		// Store the user information in the context
+		c.Set("user", res.User)
+
+		return next(c)
+	}
+}
+
+func GetUserSession(c echo.Context) *authPb.User {
+	user := c.Get("user")
+	if user == nil {
+		return nil
 	}
 
-	return claims, nil
+	return user.(*authPb.User)
 }

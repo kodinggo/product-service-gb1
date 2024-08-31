@@ -100,20 +100,20 @@ func (h *httpHandler) createCategory(c echo.Context) error {
 		})
 	}
 
-	// user, err := utils.UserClaims(c)
-	// if err != nil {
-	// 	return c.JSON(http.StatusUnauthorized, response{
-	// 		Status:  http.StatusUnauthorized,
-	// 		Message: err.Error(),
-	// 	})
-	// }
+	session := utils.GetUserSession(c)
+	if session == nil {
+		return c.JSON(http.StatusUnauthorized, response{
+			Status:  http.StatusUnauthorized,
+			Message: "error getting user session",
+		})
+	}
 
-	// if user.Role != "admin" {
-	// 	return c.JSON(http.StatusForbidden, response{
-	// 		Status:  http.StatusForbidden,
-	// 		Message: "only admin can create a category",
-	// 	})
-	// }
+	if session.Role.Name != "admin" {
+		return c.JSON(http.StatusForbidden, response{
+			Status:  http.StatusForbidden,
+			Message: "only admin can create a category",
+		})
+	}
 
 	newCategory, err := h.categoryUsecase.Create(c.Request().Context(), category)
 	if err != nil {
@@ -158,15 +158,15 @@ func (h *httpHandler) updateCategory(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.UserClaims(c)
-	if err != nil {
+	session := utils.GetUserSession(c)
+	if session == nil {
 		return c.JSON(http.StatusUnauthorized, response{
 			Status:  http.StatusUnauthorized,
-			Message: err.Error(),
+			Message: "error getting user session",
 		})
 	}
 
-	if user.Role != "admin" {
+	if session.Role.Name != "admin" {
 		return c.JSON(http.StatusForbidden, response{
 			Status:  http.StatusForbidden,
 			Message: "only admin can update a category",
@@ -199,15 +199,15 @@ func (h *httpHandler) deleteCategory(c echo.Context) error {
 		})
 	}
 
-	user, err := utils.UserClaims(c)
-	if err != nil {
+	session := utils.GetUserSession(c)
+	if session == nil {
 		return c.JSON(http.StatusUnauthorized, response{
 			Status:  http.StatusUnauthorized,
-			Message: err.Error(),
+			Message: "error getting user session",
 		})
 	}
 
-	if user.Role != "admin" {
+	if session.Role.Name != "admin" {
 		return c.JSON(http.StatusForbidden, response{
 			Status:  http.StatusForbidden,
 			Message: "only admin can delete a category",
