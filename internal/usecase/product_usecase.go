@@ -96,3 +96,16 @@ func (pu *productUsecase) FindByIDs(ctx context.Context, ids []int) ([]model.Pro
 
 	return products, nil
 }
+
+// ReserveProducts is a usecase function to reserve products
+func (pu *productUsecase) ReserveProducts(ctx context.Context, reserve []model.ReserveRequest) error {
+	logger := logrus.WithField("reserve", utils.Dump(reserve))
+
+	err := pu.productRepo.ReserveProducts(ctx, reserve)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	return nil
+}

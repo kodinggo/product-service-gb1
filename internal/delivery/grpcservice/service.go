@@ -61,3 +61,31 @@ func (ps *ProductService) FindProductByIDs(ctx context.Context, req *pb.ProductR
 		Products: pbProducts,
 	}, nil
 }
+
+func (ps *ProductService) ReserveProducts(ctx context.Context, req *pb.ReserveProductRequest) (*pb.ReserveProductResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"req": utils.Dump(req),
+	})
+
+	reserves := []model.ReserveRequest{}
+	for _, product := range req.Products {
+		reserves = append(reserves, model.ReserveRequest{
+			ID:  int(product.Id),
+			Qty: int(product.Qty),
+		})
+	}
+
+	var res pb.ReserveProductResponse
+
+	err := ps.productUsecase.ReserveProducts(ctx, reserves)
+	if err != nil {
+		logger.Error(err)
+		res.Error = err.Error()
+		return &res, nil
+	}
+
+	return &pb.ReserveProductResponse{
+		Error: "",
+	}, nil
+}

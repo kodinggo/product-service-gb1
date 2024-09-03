@@ -67,6 +67,11 @@ type ProductQuery struct {
 	Page int    `query:"page"`
 }
 
+type ReserveRequest struct {
+	ID  int `json:"id"`
+	Qty int `json:"qty"`
+}
+
 type ProductRepository interface {
 	FindAll(ctx context.Context, query ProductQuery) ([]Product, error)
 	FindByID(ctx context.Context, id int) (Product, error)
@@ -74,6 +79,7 @@ type ProductRepository interface {
 	Update(ctx context.Context, product Product) (Product, error)
 	Delete(ctx context.Context, id int) error
 	FindByIDs(ctx context.Context, ids []int) ([]Product, error)
+	ReserveProducts(ctx context.Context, reserve []ReserveRequest) error
 }
 
 type ProductUsecase interface {
@@ -83,4 +89,5 @@ type ProductUsecase interface {
 	Update(ctx context.Context, product Product) (Product, error)
 	Delete(ctx context.Context, id int) error
 	FindByIDs(ctx context.Context, ids []int) ([]Product, error)
+	ReserveProducts(ctx context.Context, reserve []ReserveRequest) error
 }

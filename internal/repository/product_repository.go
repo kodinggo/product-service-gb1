@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kodinggo/product-service-gb1/internal/model"
 	"github.com/kodinggo/product-service-gb1/internal/utils"
@@ -116,4 +117,43 @@ func (pr *productRepository) FindByIDs(ctx context.Context, ids []int) ([]model.
 	}
 
 	return products, nil
+}
+
+// ReserveProducts is a repository function to reserve products
+func (pr *productRepository) ReserveProducts(ctx context.Context, reserve []model.ReserveRequest) error {
+	logger := logrus.WithField("reserve", utils.Dump(reserve))
+
+	tx := pr.db.WithContext(ctx).Begin()
+
+	for _, r := range reserve {
+		var product model.Product
+
+		if err := tx.First(&product, r.ID).Error; err != nil {
+			tx.Rollback()
+			logger.Error(err)
+			return err
+		}
+
+		if product.Stock < r.Qty {
+			tx.Rollback()
+			err := errors.New("stock is not enough")
+			logger.Error(err)
+			return err
+		}
+
+		product.Stock -= r.Qty
+
+		if err := tx.Save(&product).Error; err != nil {
+			tx.Rollback()
+			logger.Error(err)
+			return err
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	return nil
 }
