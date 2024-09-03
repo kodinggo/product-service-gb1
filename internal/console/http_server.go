@@ -48,11 +48,15 @@ func httpServer(cmd *cobra.Command, args []string) {
 	}
 
 	categoryRepo := repository.NewCategoryRepository(mysql)
+	productRepo := repository.NewProductRepository(mysql)
+
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
+	productUsecase := usecase.NewProductUsecase(productRepo)
 
 	handler := http.NewHTTPHandler()
 	handler.RegisterAuthClient(auth)
 	handler.RegisterCategoryUsecase(categoryUsecase)
+	handler.RegisterProductUsecase(productUsecase)
 
 	authMiddleware := utils.NewJWTMiddleware(auth)
 

@@ -94,6 +94,14 @@ func (h *httpHandler) createProduct(c echo.Context) error {
 }
 
 func (h *httpHandler) updateProduct(c echo.Context) error {
+	productId := c.Param("id")
+	if productId == "" {
+		return c.JSON(http.StatusBadRequest, response{
+			Status:  http.StatusBadRequest,
+			Message: "product ID is required",
+		})
+	}
+
 	var product model.Product
 	if err := c.Bind(&product); err != nil {
 		return c.JSON(http.StatusBadRequest, response{
@@ -101,6 +109,16 @@ func (h *httpHandler) updateProduct(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+
+	parsedId, err := strconv.Atoi(productId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
+	product.ID = parsedId
 
 	session := utils.GetUserSession(c)
 	if session == nil {
@@ -117,7 +135,7 @@ func (h *httpHandler) updateProduct(c echo.Context) error {
 		})
 	}
 
-	product, err := h.productUsecase.Update(c.Request().Context(), product)
+	product, err = h.productUsecase.Update(c.Request().Context(), product)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response{
 			Status:  http.StatusInternalServerError,
