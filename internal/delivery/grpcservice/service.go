@@ -32,10 +32,32 @@ func (ps *ProductService) FindProductByID(ctx context.Context, req *pb.ProductRe
 		return nil, err
 	}
 
-	return &pb.Product{
-		Id:          int32(product.ID),
-		Name:        product.Name,
-		Description: product.Description,
-		Price:       product.Price,
+	return product.ToProto(), nil
+}
+
+func (ps *ProductService) FindProductByIDs(ctx context.Context, req *pb.ProductRequest) (*pb.Products, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"req": utils.Dump(req),
+	})
+
+	ids := []int{}
+	for _, id := range req.Ids {
+		ids = append(ids, int(id))
+	}
+
+	products, err := ps.productUsecase.FindByIDs(ctx, ids)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	var pbProducts []*pb.Product
+	for _, product := range products {
+		pbProducts = append(pbProducts, product.ToProto())
+	}
+
+	return &pb.Products{
+		Products: pbProducts,
 	}, nil
 }

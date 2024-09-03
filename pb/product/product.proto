@@ -17,8 +17,13 @@ message Product {
     repeated Photo photos = 10; 
 }
 
+message Products {
+    repeated Product products = 1;
+}
+
 message ProductRequest {
   int32 id = 1;
+  repeated int32 ids = 2;
 }
 
 message Photo {
@@ -32,4 +37,5 @@ message Photo {
 
 service ProductService {
     rpc FindProductByID(ProductRequest) returns (Product) {}
+    rpc FindProductByIDs(ProductRequest) returns (Products) {}
 }

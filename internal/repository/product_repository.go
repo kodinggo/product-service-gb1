@@ -103,3 +103,17 @@ func (pr *productRepository) Delete(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// FindByIDs is a repository function to find products by their IDs
+func (pr *productRepository) FindByIDs(ctx context.Context, ids []int) ([]model.Product, error) {
+	logger := logrus.WithField("ids", ids)
+
+	var products []model.Product
+
+	if err := pr.db.WithContext(ctx).Preload("Photos").Find(&products, ids).Error; err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	return products, nil
+}
