@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ProductServiceClient interface {
 	FindProductByID(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*Product, error)
 	FindProductByIDs(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*Products, error)
-	ReserveProduct(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*ReserveProductResponse, error)
+	ReserveProduct(ctx context.Context, in *ReserveProductRequest, opts ...grpc.CallOption) (*ReserveProductResponse, error)
 }
 
 type productServiceClient struct {
@@ -53,7 +53,7 @@ func (c *productServiceClient) FindProductByIDs(ctx context.Context, in *Product
 	return out, nil
 }
 
-func (c *productServiceClient) ReserveProduct(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*ReserveProductResponse, error) {
+func (c *productServiceClient) ReserveProduct(ctx context.Context, in *ReserveProductRequest, opts ...grpc.CallOption) (*ReserveProductResponse, error) {
 	out := new(ReserveProductResponse)
 	err := c.cc.Invoke(ctx, "/pb.ProductService/ReserveProduct", in, out, opts...)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *productServiceClient) ReserveProduct(ctx context.Context, in *ProductRe
 type ProductServiceServer interface {
 	FindProductByID(context.Context, *ProductRequest) (*Product, error)
 	FindProductByIDs(context.Context, *ProductRequest) (*Products, error)
-	ReserveProduct(context.Context, *ProductRequest) (*ReserveProductResponse, error)
+	ReserveProduct(context.Context, *ReserveProductRequest) (*ReserveProductResponse, error)
 	mustEmbedUnimplementedProductServiceServer()
 }
 
@@ -82,7 +82,7 @@ func (UnimplementedProductServiceServer) FindProductByID(context.Context, *Produ
 func (UnimplementedProductServiceServer) FindProductByIDs(context.Context, *ProductRequest) (*Products, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindProductByIDs not implemented")
 }
-func (UnimplementedProductServiceServer) ReserveProduct(context.Context, *ProductRequest) (*ReserveProductResponse, error) {
+func (UnimplementedProductServiceServer) ReserveProduct(context.Context, *ReserveProductRequest) (*ReserveProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReserveProduct not implemented")
 }
 func (UnimplementedProductServiceServer) mustEmbedUnimplementedProductServiceServer() {}
@@ -135,7 +135,7 @@ func _ProductService_FindProductByIDs_Handler(srv interface{}, ctx context.Conte
 }
 
 func _ProductService_ReserveProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProductRequest)
+	in := new(ReserveProductRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func _ProductService_ReserveProduct_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/pb.ProductService/ReserveProduct",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServiceServer).ReserveProduct(ctx, req.(*ProductRequest))
+		return srv.(ProductServiceServer).ReserveProduct(ctx, req.(*ReserveProductRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -62,7 +62,7 @@ func (ps *ProductService) FindProductByIDs(ctx context.Context, req *pb.ProductR
 	}, nil
 }
 
-func (ps *ProductService) ReserveProducts(ctx context.Context, req *pb.ReserveProductRequest) (*pb.ReserveProductResponse, error) {
+func (ps *ProductService) ReserveProduct(ctx context.Context, req *pb.ReserveProductRequest) (*pb.ReserveProductResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
 		"req": utils.Dump(req),
