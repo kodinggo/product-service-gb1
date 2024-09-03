@@ -83,3 +83,16 @@ func (pu *productUsecase) Delete(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// FindByIDs is a usecase function to find products by their IDs
+func (pu *productUsecase) FindByIDs(ctx context.Context, ids []int) ([]model.Product, error) {
+	logger := logrus.WithField("ids", ids)
+
+	products, err := pu.productRepo.FindByIDs(ctx, ids)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	return products, nil
+}

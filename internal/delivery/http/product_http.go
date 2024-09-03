@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/kodinggo/product-service-gb1/internal/model"
+	"github.com/kodinggo/product-service-gb1/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -63,6 +64,21 @@ func (h *httpHandler) createProduct(c echo.Context) error {
 		})
 	}
 
+	session := utils.GetUserSession(c)
+	if session == nil {
+		return c.JSON(http.StatusUnauthorized, response{
+			Status:  http.StatusUnauthorized,
+			Message: "error getting user session",
+		})
+	}
+
+	if session.Role.Name != "admin" {
+		return c.JSON(http.StatusForbidden, response{
+			Status:  http.StatusForbidden,
+			Message: "only admin can create a product",
+		})
+	}
+
 	product, err := h.productUsecase.Create(c.Request().Context(), product)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response{
@@ -78,6 +94,14 @@ func (h *httpHandler) createProduct(c echo.Context) error {
 }
 
 func (h *httpHandler) updateProduct(c echo.Context) error {
+	productId := c.Param("id")
+	if productId == "" {
+		return c.JSON(http.StatusBadRequest, response{
+			Status:  http.StatusBadRequest,
+			Message: "product ID is required",
+		})
+	}
+
 	var product model.Product
 	if err := c.Bind(&product); err != nil {
 		return c.JSON(http.StatusBadRequest, response{
@@ -86,7 +110,32 @@ func (h *httpHandler) updateProduct(c echo.Context) error {
 		})
 	}
 
-	product, err := h.productUsecase.Update(c.Request().Context(), product)
+	parsedId, err := strconv.Atoi(productId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
+	product.ID = parsedId
+
+	session := utils.GetUserSession(c)
+	if session == nil {
+		return c.JSON(http.StatusUnauthorized, response{
+			Status:  http.StatusUnauthorized,
+			Message: "error getting user session",
+		})
+	}
+
+	if session.Role.Name != "admin" {
+		return c.JSON(http.StatusForbidden, response{
+			Status:  http.StatusForbidden,
+			Message: "only admin can update a product",
+		})
+	}
+
+	product, err = h.productUsecase.Update(c.Request().Context(), product)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response{
 			Status:  http.StatusInternalServerError,
@@ -106,6 +155,21 @@ func (h *httpHandler) deleteProduct(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
+		})
+	}
+
+	session := utils.GetUserSession(c)
+	if session == nil {
+		return c.JSON(http.StatusUnauthorized, response{
+			Status:  http.StatusUnauthorized,
+			Message: "error getting user session",
+		})
+	}
+
+	if session.Role.Name != "admin" {
+		return c.JSON(http.StatusForbidden, response{
+			Status:  http.StatusForbidden,
+			Message: "only admin can delete a product",
 		})
 	}
 

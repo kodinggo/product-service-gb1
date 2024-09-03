@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package = "github.com/kodinggo/product-service-gb1/pb/product";
+
+package pb;
+
+message Product {
+    int32 id = 1;
+    int32 category_id = 2;
+    string name = 3;
+    string description = 4;
+    double price = 5;
+    int32 stock = 6;
+    string created_at = 7;
+    string updated_at = 8;
+    string deleted_at = 9;
+    repeated Photo photos = 10; 
+}
+
+message Products {
+    repeated Product products = 1;
+}
+
+message ProductRequest {
+  int32 id = 1;
+  repeated int32 ids = 2;
+}
+
+message Photo {
+    int32 id = 1;
+    int32 product_id = 2;
+    string url = 3;
+    string created_at = 4;
+    string updated_at = 5;
+    string deleted_at = 6;
+}
+
+service ProductService {
+    rpc FindProductByID(ProductRequest) returns (Product) {}
+    rpc FindProductByIDs(ProductRequest) returns (Products) {}
+}
